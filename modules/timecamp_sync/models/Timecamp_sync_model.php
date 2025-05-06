@@ -23,12 +23,12 @@ class Timecamp_sync_model extends App_Model
         $response = curl_exec($ch);
         curl_close($ch);
 
-        log_message('timecamp', '⏱️[TimeCamp Sync] get_or_create_mapping API response: ' . $response);
+        log_message('debug', '⏱️[TimeCamp Sync] get_or_create_mapping API response: ' . $response);
 
         $tasks = json_decode($response, true);
 
         if (!is_array($tasks)) {
-            log_message('timecamp', '⏱️[TimeCamp Sync] Invalid response from TimeCamp when fetching tasks');
+            log_message('debug', '⏱️[TimeCamp Sync] Invalid response from TimeCamp when fetching tasks');
             return [];
         }
 
@@ -39,19 +39,19 @@ class Timecamp_sync_model extends App_Model
                     'timecamp_project_id' => $task_id,
                     'last_sync' => null
                 ]);
-                log_message('timecamp', '⏱️[TimeCamp Sync] Matched and saved project "' . $project_name . '" with ID: ' . $task_id);
+                log_message('debug', '⏱️[TimeCamp Sync] Matched and saved project "' . $project_name . '" with ID: ' . $task_id);
                 return $this->db->get_where('tbl_timecamp_projects', ['perfex_project_id' => $perfex_project_id])->row_array();
             }
         }
 
-        log_message('timecamp', '⏱️[TimeCamp Sync] No matching TimeCamp task found for: ' . $project_name);
+        log_message('debug', '⏱️[TimeCamp Sync] No matching TimeCamp task found for: ' . $project_name);
         return [];
     }
 
 
     public function get_time_entries($timecamp_project_id, $last_sync)
     {
-        log_message('timecamp', '⏱️[TimeCamp Sync] Fetching entries for: ' . $timecamp_project_id . ' since: ' . $last_sync);
+        log_message('debug', '⏱️[TimeCamp Sync] Fetching entries for: ' . $timecamp_project_id . ' since: ' . $last_sync);
 
         $from = $last_sync ? date('Y-m-d', strtotime($last_sync)) : date('Y-m-d', strtotime('-600 days'));
         $to = date('Y-m-d');
@@ -66,7 +66,7 @@ class Timecamp_sync_model extends App_Model
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $response = curl_exec($ch);
-        log_message('timecamp', '⏱️[TimeCamp Sync] Raw API response: ' . $response);
+        log_message('debug', '⏱️[TimeCamp Sync] Raw API response: ' . $response);
         curl_close($ch);
 
         $data = json_decode($response, true);
@@ -82,7 +82,7 @@ class Timecamp_sync_model extends App_Model
 
         foreach ($entries as $entry) {
             if (!is_array($entry)) {
-                log_message('timecamp', '⏱️[TimeCamp Sync] Skipping invalid entry (not array): ' . print_r($entry, true));
+                log_message('debug', '⏱️[TimeCamp Sync] Skipping invalid entry (not array): ' . print_r($entry, true));
                 continue;
             }
 
@@ -95,13 +95,14 @@ class Timecamp_sync_model extends App_Model
             $staff = $this->db->get_where('staff', ['staffid' => $staff_id])->row();
             $hourly_rate = ($staff && isset($staff->hourly_rate)) ? (float) $staff->hourly_rate : 0.00;
 
-            $start = $entry['start_time'] ?? ($entry['from'] ?? null);
-            $end   = $entry['end_time'] ?? ($entry['to'] ?? null);
+            $start = $entry['date'] . ' ' . $entry['start_time'] ?? null;
+            $end   = $entry['date'] . ' ' . $entry['end_time'] ?? null;
             $duration = $entry['duration'] ?? 0;
             $note  = $entry['description'] ?? ($entry['description'] ?? 'Imported from TimeCamp');
+            //log_message('debug', '⏱️[TimeCamp Sync]: ' . print_r($entry, true));
 
-            if (!$start || !$end) {
-                log_message('timecamp', '⏱️[TimeCamp Sync] Invalid entry missing time: ' . print_r($entry, true));
+            if (!$start || !$duration) {
+                log_message('debug', '⏱️[TimeCamp Sync] Invalid entry missing time: ' . print_r($entry, true));
                 continue;
             }
 
@@ -126,7 +127,7 @@ class Timecamp_sync_model extends App_Model
                 'task_id'    => $task->id,
                 'user_id'    => get_staff_user_id(),
                 'start_time' => date('Y-m-d H:i:s', strtotime($start)),
-                'end_time'   => date('Y-m-d H:i:s', strtotime($end)),
+                'end_time'   => date('Y-m-d H:i:s', $end_unix),
                 'duration'   => $duration,
                 'note'       => $note,
             ]);

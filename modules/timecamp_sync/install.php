@@ -35,6 +35,6 @@ function timecamp_sync_module_sql_activate()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
         log_message('passed', '⏱️[TimeCamp Sync] Activation error: ');
     } catch (Exception $e) {
-        log_message('timecamp', '⏱️[TimeCamp Sync] Activation error: ' . $e->getMessage());
+        log_message('debug', '⏱️[TimeCamp Sync] Activation error: ' . $e->getMessage());
     }
 }

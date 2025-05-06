@@ -61,7 +61,7 @@ function timecamp_sync_module_init_menu()
             ]);
         }
     } catch (Exception $e) {
-        log_message('timecamp', '⏱️[TimeCamp Sync] Failed to initialize menu: ' . $e->getMessage());
+        log_message('debug', '⏱️[TimeCamp Sync] Failed to initialize menu: ' . $e->getMessage());
     }
 }
 
@@ -75,6 +75,6 @@ function timecamp_sync_module_activate()
         require_once __DIR__ . '/install.php';
         timecamp_sync_module_sql_activate(); // call the function inside install.php
     } catch (Exception $e) {
-        log_message('timecamp', '⏱️[TimeCamp Sync] timecamp_sync_module_activate: ' . $e->getMessage());
+        log_message('debug', '⏱️[TimeCamp Sync] timecamp_sync_module_activate: ' . $e->getMessage());
     }
 }

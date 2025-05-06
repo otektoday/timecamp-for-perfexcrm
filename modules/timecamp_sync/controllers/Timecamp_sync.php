@@ -28,7 +28,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 $data['api_key'] = get_option('timecamp_api_key');
                 $this->load->view('timecamp_sync/settings', $data);
                 } catch (Exception $e) {
-                    log_message('timecamp', '⏱️[TimeCamp Sync] Save settings: ' . $e->getMessage());
+                    log_message('debug', '⏱️[TimeCamp Sync] Save settings: ' . $e->getMessage());
                 }
         }
 
@@ -48,7 +48,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     
                 echo json_encode(['status' => 'success', 'imported' => count($entries)]);
             } catch (Exception $e) {
-                log_message('timecamp', '⏱️[TimeCamp Sync] sync_project: ' . $e->getMessage());
+                log_message('debug', '⏱️[TimeCamp Sync] sync_project: ' . $e->getMessage());
             }
         }
 
