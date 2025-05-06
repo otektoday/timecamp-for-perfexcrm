@@ -13,7 +13,7 @@ It automatically maps projects by name, fetches recent entries, and logs them as
 ## Installation
 1. Upload the module folder to `/modules/timecamp_sync/`
 2. Activate it from **Setup > Modules**
-3. Visit the **TimeCamp Sync Settings** in the sidebar and add your API key
+3. Visit the **TimeCamp Sync Settings** in the sidebar and add your TIMECAMP API key
 4. Use the "Sync from TimeCamp" button in any project’s timesheet tab
 
 ## Requirements
